@@ -1754,7 +1754,7 @@ cat << EOF >> /etc/neutron/plugins/ml2/linuxbridge_agent.ini
 [DEFAULT]
 [agent]
 [linux_bridge]
-physical_interface_mappings = provider:ens192
+physical_interface_mappings = provider:ens224
 [network_log]
 [securitygroup]
 enable_security_group = true
@@ -1937,7 +1937,7 @@ cat << EOF >> /etc/neutron/plugins/ml2/linuxbridge_agent.ini
 [DEFAULT]
 [agent]
 [linux_bridge]
-physical_interface_mappings = provider:ens192
+physical_interface_mappings = provider:ens224
 [network_log]
 [securitygroup]
 enable_security_group = true
