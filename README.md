@@ -18,7 +18,11 @@
 
 2.6 Horizon 
 
-2.7 ..
+2.7 Kolla 
+
+2.8 Heat
+
+2.9 ...
 
 # Cài đặt OpenStack 
 
@@ -31,6 +35,10 @@
 [3.4 Cài đặt Manual Queens tích hợp Ceph (backend Ceph)](https://github.com/uncelvel/tutorial-ceph/blob/master/docs/operating/ceph-vs-openstack.md)
 
 [3.5 Cài đặt Manual Openstack Stein](docs/setup/manual_install_stein.md)
+
+# Cài đặt Kolla OpenStack
+
+[4.1](docs/kolla-setup/r-aio.md)
 
 # Các phần bổ sung nâng cao 
 
