@@ -3,8 +3,11 @@
 ## Mô hình
 
 Cấu hình tối thiểu AIO
-
-![](../../images/r-aio/r-aio-001.png)
+- CPU >= 4
+- Ram >= 8GB
+- Disk 2 ổ:
+  - vda - OS (>= 50 GB)
+  - vdb - Cinder LVM (>= 50 GB)
 
 Sử dụng 3 Card mạng:
 - eth0: Dải Pulic API + SSH
@@ -16,6 +19,7 @@ Sử dụng 3 Card mạng:
 ### Phần 1: Chuẩn bị
 
 Cấu hình Network
+
 ```
 echo "Setup IP eth0"
 nmcli c modify eth0 ipv4.addresses 10.10.30.51/24
@@ -37,8 +41,6 @@ nmcli c modify eth2 ipv4.addresses 10.10.32.51/24
 nmcli c modify eth2 ipv4.method manual
 nmcli con mod eth2 connection.autoconnect yes
 ```
-
-> ## Lưu ý ko disable IPv6
 
 Tắt Firewall, SELinux
 ```
@@ -72,15 +74,10 @@ systemctl restart chronyd.service
 chronyc sources
 ```
 
-Cài đặt cmdlog
-```
-curl -Lso- https://raw.githubusercontent.com/nhanhoadocs/ghichep-cmdlog/master/cmdlog.sh | bash
-```
-
 Cài đặt môi trường Python
 ```
 yum install -y git wget gcc python-devel python-pip yum-utils byobu
-yum install -y libffi-devel openssl-devel libselinux-python lvm2
+yum install -y libffi-devel openssl-devel libselinux-python
 ```
 
 Cài đặt PIP
@@ -90,6 +87,11 @@ sudo pip install pip==9.0.0
 
 Lưu ý:
 - Không cài bản `pip` mới nhất, dẫn tới không thể cài kolla-ansible
+
+Cài đặt lvm
+```sh 
+yum install lvm2 -y
+```
 
 Tạo phân vùng Cinder LVM
 ```
@@ -207,16 +209,18 @@ openstack_release: "rocky"
 # enable_haproxy: "no"
 
 # Dải Mngt + admin, internal API
-kolla_internal_vip_address: "10.10.32.60"
+kolla_internal_vip_address: "10.10.32.50"
 network_interface: "eth2"
 
 # Dải Mngt Provider
 neutron_external_interface: "eth1"
 
 # Dải external (dành riêng API Public)
-kolla_external_vip_address: "10.10.30.60"
+kolla_external_vip_address: "10.10.30.50"
 kolla_external_vip_interface: "eth0"
 
+# cat /proc/cpuinfo | grep vmx | wc -l 
+# Nếu > 0 có thể dùng KVM 
 nova_compute_virt_type: "qemu"
 
 enable_cinder: "yes"
@@ -277,7 +281,7 @@ export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=oxqUwEkLKspoApwm7kixCvo585hpEqtVhaMC35jw
-export OS_AUTH_URL=http://10.10.32.106:35357/v3
+export OS_AUTH_URL=http://192.168.223.106:35357/v3
 export OS_INTERFACE=internal
 export OS_IDENTITY_API_VERSION=3
 export OS_REGION_NAME=RegionOne
@@ -292,9 +296,16 @@ Lưu ý:
 pip install python-openstackclient
 ```
 
-### 2 cách fix openstack client
+#### 2 cách fix openstack client
+##### Cách 1: Cài đặt Openstack client tại 1 node CentOS khác
+```
+yum install centos-release-openstack-rocky -y
+yum install python-openstackclient -y
+```
 
-#### Cách 1: Cài đặt Openstack client tại virtualenv, bảo đảm verion `pip` là mới nhất
+Lưu ý: `KHÔNG CÀI ĐẶT TẠI NODE OPENSTACK AIO` => Ảnh hưởng tới môi trường Python, và có thể dẫn tới 1 số lỗi không mong muốn
+
+##### Cách 2: Cài đặt Openstack client tại virtualenv, bảo đảm verion `pip` là mới nhất
 
 Thực hiện
 ```
@@ -313,14 +324,6 @@ Cài đặt Openstack client
 ```
 pip install python-openstackclient
 ```
-
-#### Cách 2: Cài đặt Openstack client tại 1 node CentOS khác
-```
-yum install centos-release-openstack-rocky -y
-yum install python-openstackclient -y
-```
-
-Lưu ý: `KHÔNG CÀI ĐẶT TẠI NODE OPENSTACK AIO` => Ảnh hưởng tới môi trường Python, và có thể dẫn tới 1 số lỗi không mong muốn
 
 Kiểm tra
 ```

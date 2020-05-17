@@ -38,32 +38,34 @@
 
 # Cài đặt Kolla OpenStack
 
-[4.1](docs/kolla-setup/r-aio.md)
+[4.1 Install Kolla OPS Rocky AIO from Git](docs/kolla-setup/r-git-aio.md)
+
+[4.1 Install Kolla OPS Train AIO from Packages](docs/kolla-setup/t-package-aio.md)
 
 # Các phần bổ sung nâng cao 
 
-[4.1 Pacemaker Corosyc - High Availability](https://github.com/uncelvel/ghichep-pacemaker-corosync)
+[Pacemaker Corosyc - High Availability](https://github.com/uncelvel/ghichep-pacemaker-corosync)
 
-[4.2 Cài đặt HA Queens](https://github.com/uncelvel/tutorial-openstackHA/)
+[Cài đặt HA Queens](https://github.com/uncelvel/tutorial-openstackHA/)
 
-[4.3 Cấu hình Migrate](docs/other/cau_hinh_migrate.md)
+[Cấu hình Migrate](docs/other/cau_hinh_migrate.md)
 
-[4.4 Evacute VM](docs/other/evacute_vm.md)
+[Evacute VM](docs/other/evacute_vm.md)
 
-[4.5 Các lưu ý đối với VM Windows](docs/other/VM_windows.md)
+[Các lưu ý đối với VM Windows](docs/other/VM_windows.md)
 
-[4.6 Thao tác đóng Images](https://github.com/uncelvel/create-images-openstack)
+[Thao tác đóng Images](https://github.com/uncelvel/create-images-openstack)
 
-[4.7 Qos Network](docs/other/qos_network.md)
+[Qos Network](docs/other/qos_network.md)
 
-[4.8 Qos Disk](docs/other/qos_disk.md)
+[Qos Disk](docs/other/qos_disk.md)
 
-[4.9 Check list cài đặt Compute](docs/other/check_list_compute.md)
+[Check list cài đặt Compute](docs/other/check_list_compute.md)
 
-[4.10 Cấu hình MultiRegion](docs/other/multi-region.md)
+[Cấu hình MultiRegion](docs/other/multi-region.md)
 
-[4.11 Cấu hình Message Queue](docs/other/message_queue.md)
+[Cấu hình Message Queue](docs/other/message_queue.md)
 
-[4.12 Lưu ý đối với cài đặt vận hành](docs/other/note.md)
+[Lưu ý đối với cài đặt vận hành](docs/other/note.md)
 
-[4.13 Check CPU live Migrate Compute mới](docs/other/live_migrate_check.md)
+[Check CPU live Migrate Compute mới](docs/other/live_migrate_check.md)
