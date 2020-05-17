@@ -3,7 +3,7 @@
 ## Mô hình
 
 Cấu hình tối thiểu AIO
-- CPU >= 4
+- CPU >= 6
 - Ram >= 8GB
 - Disk 2 ổ:
   - vda - OS (>= 50 GB)
@@ -76,7 +76,7 @@ chronyc sources
 
 Cài đặt môi trường Python
 ```
-yum install -y git wget gcc python-devel python-pip yum-utils byobu
+yum install -y git wget gcc python-devel python-pip yum-utils byobu vim 
 yum install -y libffi-devel openssl-devel libselinux-python
 ```
 
@@ -272,29 +272,41 @@ cd /opt/
 kolla-ansible -i ./all-in-one post-deploy
 ```
 
-Kiểm tra
+Bổ sung file `admin-openrc`
 ```
-$ cat /etc/kolla/admin-openrc.sh
+cd /root
+
+keystone_admin_password=$(cat /etc/kolla/passwords.yml | grep keystone_admin_password | awk '{print $2}')
+
+
+cat << EOF> /etc/kolla/admin-openrc.sh
 export OS_PROJECT_DOMAIN_NAME=Default
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_NAME=admin
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
-export OS_PASSWORD=oxqUwEkLKspoApwm7kixCvo585hpEqtVhaMC35jw
-export OS_AUTH_URL=http://192.168.223.106:35357/v3
+export OS_PASSWORD=$keystone_admin_password
+export OS_AUTH_URL=http://10.10.32.50:35357/v3
 export OS_INTERFACE=internal
 export OS_IDENTITY_API_VERSION=3
 export OS_REGION_NAME=RegionOne
 export OS_AUTH_PLUGIN=password
+EOF
+
+ln -s /etc/kolla/admin-openrc.sh /root
+```
+
+Kiểm tra file
+```sh 
+cat /etc/kolla/admin-openrc.sh
+cat /root/admin-openrc.sh
 ```
 
 Cài đặt openstack client
 Lưu ý:
-- Có thể không sử dụng python client tại Node Openstack AIO, cách fix => Dùng 1 trong 2 cách bên dưới
+- Không nên cài đặt openstack client trực tiếp trên Node Openstack AIO ==> Ảnh hưởng tới môi trường Python, và có thể dẫn tới 1 số lỗi không mong muốn
 - Issue: https://ask.openstack.org/en/question/120582/importerror-cannot-import-name-decorate/
-```
-pip install python-openstackclient
-```
+- Cách fix => Dùng 1 trong 2 cách bên dưới
 
 #### 2 cách fix openstack client
 ##### Cách 1: Cài đặt Openstack client tại 1 node CentOS khác
@@ -303,7 +315,7 @@ yum install centos-release-openstack-rocky -y
 yum install python-openstackclient -y
 ```
 
-Lưu ý: `KHÔNG CÀI ĐẶT TẠI NODE OPENSTACK AIO` => Ảnh hưởng tới môi trường Python, và có thể dẫn tới 1 số lỗi không mong muốn
+Lưu ý: `KHÔNG CÀI ĐẶT TẠI NODE OPENSTACK AIO` mà là một node mới hoàn toàn 
 
 ##### Cách 2: Cài đặt Openstack client tại virtualenv, bảo đảm verion `pip` là mới nhất
 
@@ -316,20 +328,20 @@ source openstack-client/bin/activate
 
 Kiểm tra
 ```
-(openstack-client) [root@opsaio98 ~]# pip --version
+(openstack-client) [root@kolla ~]# pip --version
 pip 19.3.1 from /root/openstack-client/lib/python2.7/site-packages/pip (python 2.7)
 ```
 
 Cài đặt Openstack client
 ```
-pip install python-openstackclient
+(openstack-client) [root@kolla ~]# pip install python-openstackclient
 ```
 
 Kiểm tra
 ```
-(openstack-client) [root@opsaio98 ~]# . /etc/kolla/admin-openrc.sh
+(openstack-client) [root@kolla ~]# source admin-openrc.sh
 
-(openstack-client) [root@opsaio98 ~]# openstack token issue
+(openstack-client) [root@kolla ~]# openstack token issue
 +------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Field      | Value                                                                                                                                                                                   |
 +------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -340,11 +352,55 @@ Kiểm tra
 +------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-#### Khởi tạo cấu hình ban đầu cho Openstack
+> Nếu lõi 
+```sh 
+(openstack-client) [root@kolla ~]# openstack token issue 
+Traceback (most recent call last):
+  File "/root/openstack-client/bin/openstack", line 5, in <module>
+    from openstackclient.shell import main
+  File "/root/openstack-client/lib/python2.7/site-packages/openstackclient/shell.py", line 24, in <module>
+    from osc_lib import shell
+  File "/root/openstack-client/lib/python2.7/site-packages/osc_lib/shell.py", line 33, in <module>
+    from osc_lib.cli import client_config as cloud_config
+  File "/root/openstack-client/lib/python2.7/site-packages/osc_lib/cli/client_config.py", line 18, in <module>
+    from openstack.config import exceptions as sdk_exceptions
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/__init__.py", line 16, in <module>
+    import openstack.config
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/config/__init__.py", line 17, in <module>
+    from openstack.config.loader import OpenStackConfig  # noqa
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/config/loader.py", line 33, in <module>
+    from openstack.config import cloud_region
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/config/cloud_region.py", line 44, in <module>
+    from openstack import proxy
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/proxy.py", line 24, in <module>
+    from openstack import resource
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/resource.py", line 49, in <module>
+    from openstack import utils
+  File "/root/openstack-client/lib/python2.7/site-packages/openstack/utils.py", line 13, in <module>
+    import queue
+ImportError: No module named queue
+(openstack-client) [root@kolla ~]# 
 ```
-. /etc/kolla/admin-openrc.sh
-openstack token issue
 
+Xử lý như sau 
+
+- Chỉnh sửa file `/root/openstack-client/lib/python2.7/site-packages/openstack/utils.py` dòng 13
+- Chỉnh sửa file `/root/openstack-client/lib/python2.7/site-packages/openstack/cloud/openstackcloud.py` dòng 14 
+
+Nội dung chỉnh sửa đổi từ `import queue` thành `import Queue as queue`
+```sh 
+#import queue
+import Queue as queue
+```
+
+Kiểm tra lại cho đến khi get được token thì thành công 
+
+
+#### Tiến hành up Images cirros lên OPS
+```
+cd /root
+source openstack-client/bin/activate
+source admin-openrc.sh
 /usr/share/kolla-ansible/init-runonce
 ```
 
